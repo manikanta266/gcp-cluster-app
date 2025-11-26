@@ -6,7 +6,7 @@ import os
 app = Flask(__name__)
 CORS(app)
 
-#m
+#mani
 def get_db():
     host = os.getenv("DB_HOST")
     user = os.getenv("DB_USER")

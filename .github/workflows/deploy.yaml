@@ -1,0 +1,52 @@
+name: Deploy to GKE
+
+on:
+  push:
+    branches: ["main"]
+
+permissions:
+  contents: 'read'
+  id-token: 'write'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        workload_identity_provider: "projects/677553947183/locations/global/workloadIdentityPools/github-provider/providers/github-provider"
+        service_account: "ferrous-agency-467506-m8@appspot.gserviceaccount.com"
+
+    - name: Configure Docker for Artifact Registry
+      run: |
+        gcloud auth configure-docker us-central1-docker.pkg.dev
+
+    - name: Build Frontend Image
+      run: |
+        docker build -t us-central1-docker.pkg.dev/ferrous-agency-467506-m8/git-repos/frontend-app:latest ./frontend
+
+    - name: Push Frontend Image
+      run: |
+        docker push us-central1-docker.pkg.dev/ferrous-agency-467506-m8/git-repos/frontend-app:latest
+
+    - name: Build Backend Image
+      run: |
+        docker build -t us-central1-docker.pkg.dev/ferrous-agency-467506-m8/git-repos/backend-app:latest ./backend
+
+    - name: Push Backend Image
+      run: |
+        docker push us-central1-docker.pkg.dev/ferrous-agency-467506-m8/git-repos/backend-app:latest
+
+    - name: Get GKE Credentials
+      run: |
+        gcloud container clusters get-credentials cluster-1 --zone us-central1-a --project ferrous-agency-467506-m8
+
+    - name: Deploy to GKE
+      run: |
+        kubectl set image deployment/frontend-deployment frontend=us-central1-docker.pkg.dev/ferrous-agency-467506-m8/git-repos/frontend-app:latest
+        kubectl set image deployment/backend-deployment backend=us-central1-docker.pkg.dev/ferrous-agency-467506-m8/git-repos/backend-app:latest

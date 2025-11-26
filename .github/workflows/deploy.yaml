@@ -41,6 +41,12 @@ jobs:
     - name: Push Backend Image
       run: |
         docker push us-central1-docker.pkg.dev/ferrous-agency-467506-m8/git-repos/backend-app:latest
+
+    - name: Add Google Cloud SDK APT repo
+      run: |
+        echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | sudo tee /etc/apt/sources.list.d/google-cloud-sdk.list
+        curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
+        sudo apt-get update
         
     - name: Install GKE gcloud auth plugin
       run: |

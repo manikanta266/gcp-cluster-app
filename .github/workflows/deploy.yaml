@@ -42,10 +42,11 @@ jobs:
       run: |
         docker push us-central1-docker.pkg.dev/ferrous-agency-467506-m8/git-repos/backend-app:latest
 
-    - name: Add Google Cloud SDK APT repo
+    - name: Add Google Cloud SDK APT repo (NEW method)
       run: |
+        sudo mkdir -p /usr/share/keyrings
+        curl -fsSL https://packages.cloud.google.com/apt/doc/apt-key.gpg | gpg --dearmor | sudo tee /usr/share/keyrings/cloud.google.gpg > /dev/null
         echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | sudo tee /etc/apt/sources.list.d/google-cloud-sdk.list
-        curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
         sudo apt-get update
         
     - name: Install GKE gcloud auth plugin
